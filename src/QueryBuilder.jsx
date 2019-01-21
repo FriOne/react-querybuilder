@@ -44,15 +44,6 @@ export default class QueryBuilder extends React.Component {
         };
     }
 
-
-    constructor(...args) {
-        super(...args);
-        this.state = {
-            root: {},
-            schema: {},
-        };
-    }
-
     static get defaultTranslations() {
 
         return {
@@ -143,55 +134,15 @@ export default class QueryBuilder extends React.Component {
         };
     }
 
-
-    componentWillReceiveProps(nextProps) {
-        let schema  = {...this.state.schema};
-
-         if (this.props.query !== nextProps.query) {
-             this.setState({ root: this.generateValidQuery(nextProps.query) });
-         }
-
-         if(schema.fields !== nextProps.fields){
-             schema.fields = nextProps.fields;
-              this.setState({ schema });
-         }
-
+    static isRuleGroup(rule) {
+        return !!(rule.combinator && rule.rules);
     }
 
-    componentWillMount() {
-        const {fields, operators, combinators, controlElements, controlClassnames} = this.props;
-        const classNames = Object.assign({}, QueryBuilder.defaultControlClassnames, controlClassnames);
-        const controls = Object.assign({}, QueryBuilder.defaultControlElements, controlElements);
-        this.setState({
-            root: this.getInitialQuery(),
-            schema: {
-                fields,
-                operators,
-                combinators,
-
-                classNames,
-
-                createRule: this.createRule.bind(this),
-                createRuleGroup: this.createRuleGroup.bind(this),
-                onRuleAdd: this._notifyQueryChange.bind(this, this.onRuleAdd),
-                onGroupAdd: this._notifyQueryChange.bind(this, this.onGroupAdd),
-                onRuleRemove: this._notifyQueryChange.bind(this, this.onRuleRemove),
-                onGroupRemove: this._notifyQueryChange.bind(this, this.onGroupRemove),
-                onPropChange: this._notifyQueryChange.bind(this, this.onPropChange),
-                getLevel: this.getLevel.bind(this),
-                isRuleGroup: this.isRuleGroup.bind(this),
-                controls,
-                getOperators: (...args)=>this.getOperators(...args),
-            }
-        });
-
-    }
-
-    generateValidQuery(query) {
-        if(this.isRuleGroup(query)) {
+    static generateValidQuery(query) {
+        if(QueryBuilder.isRuleGroup(query)) {
             return ({
                 id: query.id || `g-${uniqueId()}`,
-                rules: query.rules.map(rule => this.generateValidQuery(rule)),
+                rules: query.rules.map(rule => QueryBuilder.generateValidQuery(rule)),
                 combinator: query.combinator,
             });
         }
@@ -201,13 +152,62 @@ export default class QueryBuilder extends React.Component {
         });
     }
 
-    getInitialQuery() {
-        const {query} = this.props;
-        return (query && this.generateValidQuery(query)) || this.createRuleGroup();
+    static getDerivedStateFromProps(nextProps, prevState) {
+        const { query, fields, operators, combinators, controlElements, controlClassnames } = nextProps;
+        const { prevQuery, schema: prevSchema } = prevState;
+        const classNames = Object.assign({}, QueryBuilder.defaultControlClassnames, controlClassnames);
+        const controls = Object.assign({}, QueryBuilder.defaultControlElements, controlElements);
+        let root = {};
+        let schema = {
+            fields,
+            operators,
+            combinators,
+            classNames,
+            controls,
+            ...prevSchema
+        };
+
+        if (query && prevQuery !== query) {
+            root = QueryBuilder.generateValidQuery(query);
+        }
+
+        if (prevSchema.fields !== fields) {
+            schema.fields = fields;
+        }
+
+        return {
+            prevQuery: query,
+            root,
+            schema
+        };
     }
+
+    state = {
+        root: this.createRuleGroup(),
+        schema: {
+            createRule: this.createRule.bind(this),
+            createRuleGroup: this.createRuleGroup.bind(this),
+            onRuleAdd: this._notifyQueryChange.bind(this, this.onRuleAdd),
+            onGroupAdd: this._notifyQueryChange.bind(this, this.onGroupAdd),
+            onRuleRemove: this._notifyQueryChange.bind(this, this.onRuleRemove),
+            onGroupRemove: this._notifyQueryChange.bind(this, this.onGroupRemove),
+            onPropChange: this._notifyQueryChange.bind(this, this.onPropChange),
+            getLevel: this.getLevel.bind(this),
+            isRuleGroup: QueryBuilder.isRuleGroup,
+            getOperators: (...args) => this.getOperators(...args),
+        }
+    };
 
     componentDidMount() {
         this._notifyQueryChange(null);
+    }
+
+    createRuleGroup() {
+        return {
+            id: `g-${uniqueId()}`,
+            rules: [],
+            combinator: this.props.combinators[0].name,
+        };
     }
 
     render() {
@@ -228,11 +228,6 @@ export default class QueryBuilder extends React.Component {
         );
     }
 
-
-    isRuleGroup(rule) {
-        return !!(rule.combinator && rule.rules);
-    }
-
     createRule() {
         const {fields, operators} = this.state.schema;
 
@@ -241,14 +236,6 @@ export default class QueryBuilder extends React.Component {
             field: fields[0].name,
             value: '',
             operator: operators[0].name
-        };
-    }
-
-    createRuleGroup() {
-        return {
-            id: `g-${uniqueId()}`,
-            rules: [],
-            combinator: this.props.combinators[0].name,
         };
     }
 

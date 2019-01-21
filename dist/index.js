@@ -1667,6 +1667,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _v = __webpack_require__(24);
@@ -1704,49 +1706,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var QueryBuilder = function (_React$Component) {
     _inherits(QueryBuilder, _React$Component);
 
-    _createClass(QueryBuilder, null, [{
-        key: 'defaultProps',
-        get: function get() {
-            return {
-                query: null,
-                fields: [],
-                operators: QueryBuilder.defaultOperators,
-                combinators: QueryBuilder.defaultCombinators,
-                translations: QueryBuilder.defaultTranslations,
-                controlElements: null,
-                getOperators: null,
-                onQueryChange: null,
-                controlClassnames: null
-            };
-        }
-    }, {
-        key: 'propTypes',
-        get: function get() {
-            return {
-                query: _propTypes2.default.object,
-                fields: _propTypes2.default.array.isRequired,
-                operators: _propTypes2.default.array,
-                combinators: _propTypes2.default.array,
-                controlElements: _propTypes2.default.shape({
-                    addGroupAction: _propTypes2.default.func,
-                    removeGroupAction: _propTypes2.default.func,
-                    addRuleAction: _propTypes2.default.func,
-                    removeRuleAction: _propTypes2.default.func,
-                    combinatorSelector: _propTypes2.default.func,
-                    fieldSelector: _propTypes2.default.func,
-                    operatorSelector: _propTypes2.default.func,
-                    valueEditor: _propTypes2.default.func
-                }),
-                getOperators: _propTypes2.default.func,
-                onQueryChange: _propTypes2.default.func,
-                controlClassnames: _propTypes2.default.object,
-                translations: _propTypes2.default.object
-            };
-        }
-    }]);
-
     function QueryBuilder() {
         var _ref;
+
+        var _temp, _this, _ret;
 
         _classCallCheck(this, QueryBuilder);
 
@@ -1754,63 +1717,22 @@ var QueryBuilder = function (_React$Component) {
             args[_key] = arguments[_key];
         }
 
-        var _this = _possibleConstructorReturn(this, (_ref = QueryBuilder.__proto__ || Object.getPrototypeOf(QueryBuilder)).call.apply(_ref, [this].concat(args)));
-
-        _this.state = {
-            root: {},
-            schema: {}
-        };
-        return _this;
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = QueryBuilder.__proto__ || Object.getPrototypeOf(QueryBuilder)).call.apply(_ref, [this].concat(args))), _this), _initialiseProps.call(_this), _temp), _possibleConstructorReturn(_this, _ret);
     }
 
     _createClass(QueryBuilder, [{
-        key: 'componentWillMount',
-        value: function componentWillMount() {
-            var _this2 = this;
-
-            var _props = this.props,
-                fields = _props.fields,
-                operators = _props.operators,
-                combinators = _props.combinators,
-                controlElements = _props.controlElements,
-                controlClassnames = _props.controlClassnames;
-
-            var classNames = Object.assign({}, QueryBuilder.defaultControlClassnames, controlClassnames);
-            var controls = Object.assign({}, QueryBuilder.defaultControlElements, controlElements);
-            this.setState({
-                root: this.getInitialQuery(),
-                schema: {
-                    fields: fields,
-                    operators: operators,
-                    combinators: combinators,
-
-                    classNames: classNames,
-
-                    createRule: this.createRule.bind(this),
-                    createRuleGroup: this.createRuleGroup.bind(this),
-                    onRuleAdd: this._notifyQueryChange.bind(this, this.onRuleAdd),
-                    onGroupAdd: this._notifyQueryChange.bind(this, this.onGroupAdd),
-                    onRuleRemove: this._notifyQueryChange.bind(this, this.onRuleRemove),
-                    onGroupRemove: this._notifyQueryChange.bind(this, this.onGroupRemove),
-                    onPropChange: this._notifyQueryChange.bind(this, this.onPropChange),
-                    getLevel: this.getLevel.bind(this),
-                    isRuleGroup: this.isRuleGroup.bind(this),
-                    controls: controls,
-                    getOperators: function getOperators() {
-                        return _this2.getOperators.apply(_this2, arguments);
-                    }
-                }
-            });
-        }
-    }, {
-        key: 'getInitialQuery',
-        value: function getInitialQuery() {
-            return this.props.query || this.createRuleGroup();
-        }
-    }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
             this._notifyQueryChange(null);
+        }
+    }, {
+        key: 'createRuleGroup',
+        value: function createRuleGroup() {
+            return {
+                id: 'g-' + (0, _v2.default)(),
+                rules: [],
+                combinator: this.props.combinators[0].name
+            };
         }
     }, {
         key: 'render',
@@ -1838,11 +1760,6 @@ var QueryBuilder = function (_React$Component) {
             );
         }
     }, {
-        key: 'isRuleGroup',
-        value: function isRuleGroup(rule) {
-            return !!(rule.combinator && rule.rules);
-        }
-    }, {
         key: 'createRule',
         value: function createRule() {
             var _state$schema = this.state.schema,
@@ -1855,15 +1772,6 @@ var QueryBuilder = function (_React$Component) {
                 field: fields[0].name,
                 value: '',
                 operator: operators[0].name
-            };
-        }
-    }, {
-        key: 'createRuleGroup',
-        value: function createRuleGroup() {
-            return {
-                id: 'g-' + (0, _v2.default)(),
-                rules: [],
-                combinator: this.props.combinators[0].name
             };
         }
     }, {
@@ -1932,7 +1840,7 @@ var QueryBuilder = function (_React$Component) {
     }, {
         key: '_getLevel',
         value: function _getLevel(id, index, root) {
-            var _this3 = this;
+            var _this2 = this;
 
             var isRuleGroup = this.state.schema.isRuleGroup;
 
@@ -1945,7 +1853,7 @@ var QueryBuilder = function (_React$Component) {
                     if (foundAtIndex === -1) {
                         var indexForRule = index;
                         if (isRuleGroup(rule)) indexForRule++;
-                        foundAtIndex = _this3._getLevel(id, indexForRule, rule);
+                        foundAtIndex = _this2._getLevel(id, indexForRule, rule);
                     }
                 });
             }
@@ -2012,6 +1920,103 @@ var QueryBuilder = function (_React$Component) {
             }
         }
     }], [{
+        key: 'isRuleGroup',
+        value: function isRuleGroup(rule) {
+            return !!(rule.combinator && rule.rules);
+        }
+    }, {
+        key: 'generateValidQuery',
+        value: function generateValidQuery(query) {
+            if (QueryBuilder.isRuleGroup(query)) {
+                return {
+                    id: query.id || 'g-' + (0, _v2.default)(),
+                    rules: query.rules.map(function (rule) {
+                        return QueryBuilder.generateValidQuery(rule);
+                    }),
+                    combinator: query.combinator
+                };
+            }
+            return _extends({
+                id: query.id || 'r-' + (0, _v2.default)()
+            }, query);
+        }
+    }, {
+        key: 'getDerivedStateFromProps',
+        value: function getDerivedStateFromProps(nextProps, prevState) {
+            var query = nextProps.query,
+                fields = nextProps.fields,
+                operators = nextProps.operators,
+                combinators = nextProps.combinators,
+                controlElements = nextProps.controlElements,
+                controlClassnames = nextProps.controlClassnames;
+            var prevQuery = prevState.prevQuery,
+                prevSchema = prevState.schema;
+
+            var classNames = Object.assign({}, QueryBuilder.defaultControlClassnames, controlClassnames);
+            var controls = Object.assign({}, QueryBuilder.defaultControlElements, controlElements);
+            var root = {};
+            var schema = _extends({
+                fields: fields,
+                operators: operators,
+                combinators: combinators,
+                classNames: classNames,
+                controls: controls
+            }, prevSchema);
+
+            if (query && prevQuery !== query) {
+                root = QueryBuilder.generateValidQuery(query);
+            }
+
+            if (prevSchema.fields !== fields) {
+                schema.fields = fields;
+            }
+
+            return {
+                prevQuery: query,
+                root: root,
+                schema: schema
+            };
+        }
+    }, {
+        key: 'defaultProps',
+        get: function get() {
+            return {
+                query: null,
+                fields: [],
+                operators: QueryBuilder.defaultOperators,
+                combinators: QueryBuilder.defaultCombinators,
+                translations: QueryBuilder.defaultTranslations,
+                controlElements: null,
+                getOperators: null,
+                onQueryChange: null,
+                controlClassnames: null
+            };
+        }
+    }, {
+        key: 'propTypes',
+        get: function get() {
+            return {
+                query: _propTypes2.default.object,
+                fields: _propTypes2.default.array.isRequired,
+                operators: _propTypes2.default.array,
+                combinators: _propTypes2.default.array,
+                controlElements: _propTypes2.default.shape({
+                    addGroupAction: _propTypes2.default.func,
+                    removeGroupAction: _propTypes2.default.func,
+                    addRuleAction: _propTypes2.default.func,
+                    removeRuleAction: _propTypes2.default.func,
+                    combinatorSelector: _propTypes2.default.func,
+                    fieldSelector: _propTypes2.default.func,
+                    operatorSelector: _propTypes2.default.func,
+                    valueEditor: _propTypes2.default.func
+                }),
+                getOperators: _propTypes2.default.func,
+                onQueryChange: _propTypes2.default.func,
+                controlClassnames: _propTypes2.default.object,
+                translations: _propTypes2.default.object
+            };
+        }
+    }, {
         key: 'defaultTranslations',
         get: function get() {
 
@@ -2096,6 +2101,28 @@ var QueryBuilder = function (_React$Component) {
 
     return QueryBuilder;
 }(_react2.default.Component);
+
+var _initialiseProps = function _initialiseProps() {
+    var _this3 = this;
+
+    this.state = {
+        root: this.createRuleGroup(),
+        schema: {
+            createRule: this.createRule.bind(this),
+            createRuleGroup: this.createRuleGroup.bind(this),
+            onRuleAdd: this._notifyQueryChange.bind(this, this.onRuleAdd),
+            onGroupAdd: this._notifyQueryChange.bind(this, this.onGroupAdd),
+            onRuleRemove: this._notifyQueryChange.bind(this, this.onRuleRemove),
+            onGroupRemove: this._notifyQueryChange.bind(this, this.onGroupRemove),
+            onPropChange: this._notifyQueryChange.bind(this, this.onPropChange),
+            getLevel: this.getLevel.bind(this),
+            isRuleGroup: QueryBuilder.isRuleGroup,
+            getOperators: function getOperators() {
+                return _this3.getOperators.apply(_this3, arguments);
+            }
+        }
+    };
+};
 
 exports.default = QueryBuilder;
 

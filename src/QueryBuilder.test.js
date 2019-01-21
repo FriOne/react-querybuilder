@@ -10,19 +10,6 @@ describe('<QueryBuilder />', () => {
     });
 
     describe('when rendered', () => {
-
-        it('calls componentWillMount', () => {
-            sinon.spy(QueryBuilder.prototype, 'componentWillMount');
-            const dom = mount(<QueryBuilder />);
-            expect(QueryBuilder.prototype.componentWillMount.calledOnce).to.equal(true);
-            dom.unmount();
-        });
-        it('calls componentDidMount', () => {
-            sinon.spy(QueryBuilder.prototype, 'componentDidMount');
-            const dom = mount(<QueryBuilder />);
-            expect(QueryBuilder.prototype.componentDidMount.calledOnce).to.equal(true);
-
-        });
         it('should render the root RuleGroup', () => {
             const dom = shallow(<QueryBuilder />);
             expect(dom.find('RuleGroup')).to.have.length(1);
